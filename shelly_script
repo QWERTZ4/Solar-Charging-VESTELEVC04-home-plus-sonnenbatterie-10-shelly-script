@@ -1,0 +1,81 @@
+let CONFIG = {
+  IP : "192.168.178.62",
+  TOKEN  : "d0416b80-3358-4974-9646-4c176c4e0e37",
+  SOLAR_MIN_START : 4000,
+  SOLAR_MIN_STOP : 3600,
+  REQUEST_TIMER : 15000,
+  DECISION_TIMER : 180000
+}
+
+let SUM = {
+  Production_W : 0,
+  GridFeedIn_W : 0,
+  Consumption_W : 0,
+  USOC : 0
+}
+
+let AVG = {
+  Production_W : 0,
+  GridFeedIn_W : 0,
+  Consumption_W : 0,
+  USOC : 0
+}
+
+var count = 0
+var rep = Math.ceil(CONFIG.DECISION_TIMER / CONFIG.REQUEST_TIMER)
+
+function turn_relais_on() {
+  Shelly.call("Switch.Set","{ id:0, on:true }",null,null)
+    print("ON")
+}
+
+function turn_relais_off() {
+  Shelly.call("Switch.Set","{ id:0, on:false }",null,null)
+    print("OFF")
+}
+
+function get_values() {
+  if (count < rep) {
+    Shelly.call(
+    "HTTP.Request",  {
+      "method": "GET",
+      "url": "http://" + CONFIG.IP + ":80/api/v2/latestdata",
+      "headers": {"Auth-Token": CONFIG.TOKEN}
+      },
+      function(result) {
+        if (result.code === 200) {
+          let DATA = JSON.parse(result.body)
+          SUM.Production_W = SUM.Production_W + DATA.Production_W
+          SUM.GridFeedIn_W = SUM.GridFeedIn_W + DATA.GridFeedIn_W
+          SUM.Consumption_W = SUM.Consumption_W + DATA.Consumption_W
+          SUM.USOC = SUM.USOC + DATA.USOC
+          count = count + 1
+          print(DATA.Production_W)
+          if (count >= rep) {
+            AVG.Production_W = SUM.Production_W / rep
+            AVG.GridFeedIn_W = SUM.GridFeedIn_W / rep
+            AVG.Consumption_W = SUM.Consumption_W / rep
+            AVG.USOC = SUM.USOC / rep
+            print("average Production: " + AVG.Production_W)
+            
+            if (AVG.Production_W >= CONFIG.SOLAR_MIN_START) {
+              turn_relais_on()
+            }
+            else if (AVG.Production_W <= CONFIG.SOLAR_MIN_STOP) {
+              turn_relais_off()
+            }
+            count = 0
+            SUM.Production_W  = 0
+            }
+          }
+        else {
+          print("Fehler beim Abrufen der Daten")
+        }
+      })
+  }
+}
+Timer.set(
+  CONFIG.REQUEST_TIMER,
+  true,
+  get_values
+)
