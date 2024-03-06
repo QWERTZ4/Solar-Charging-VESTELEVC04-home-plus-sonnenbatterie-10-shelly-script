@@ -12,13 +12,16 @@ Controls:
 SOLAR_MIN_START : 
 -The amount of Watts of Solar Power for the Wallbox to turn
 -Recomended >3600 <11000 for 3-Phase charging
+
 SOLAR_MIN_STOP : 
 -The amount of Watts of Solar Power for the Wallbox to turn
--NOTE: Can be same as SOLAR_MIN_START
+-NOTE: Can be same as SOLAR_MIN_STAR
+
 REQUEST_TIMER : 
 -The time in milliseconds between API calls, higher = better acurracy 
 -NOTE: setting this too low causes crashes and high traffic on the network 
 -Recomended: <3000ms
+
 DECISION_TIMER : 
 -The minimum time in milliseconds the wallbox is turned on, handy with cloudy weather 
 NOTE: setting this too low can cause problems with the car 
