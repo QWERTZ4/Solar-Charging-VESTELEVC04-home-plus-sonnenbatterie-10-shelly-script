@@ -28,3 +28,5 @@ NOTE: setting this too low can cause problems with the car
 Recomended <60000ms
 
 The mode can also be switched from Power Production to Grid feed based decisions by replacing the according varaibles
+
+How to connect Shelly to VESTEL EVC04 home plus: https://www.vestel-echarger.com/downloads/eCharger_Installationsanleitung_EVC04-AC22SW.pdf
